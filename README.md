@@ -71,6 +71,9 @@ This method is necessary to bypass potential Cloudflare challenges.
         ```powershell
         & "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222
         ```
+        if that doesn't work try this: 
+        .\chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\ChromeDebug"
+
     *   This will open a new Chrome window controlled by the command line.
 
 2.  **Prepare the Browser:**
