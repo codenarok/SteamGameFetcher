@@ -1,0 +1,13 @@
+# requirements.txt
+# List project dependencies here
+# Example:
+# requests
+# pandas
+# PyQt5 or other GUI library
+
+pandas
+playwright
+playwright-stealth
+pyodbc # Added for Azure SQL connection
+pymongo
+azure-identity
