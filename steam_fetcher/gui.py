@@ -26,18 +26,18 @@ class AppGUI:
         # --- Option 2 (Run Full Steam Data Scrape) - Moved to Top ---
         self.option2_button = ttk.Button(
             main_frame,
-            text="🕸️ Scrape All Game Data to CSV", # Renamed for clarity
+            text="Scrape All Game Data to CSV", # Emoji removed
             command=self.start_full_scrape_thread
         )
-        self.option2_button.pack(pady=5, fill=tk.X, ipady=2) # Added ipady for a bit more height
+        self.option2_button.pack(pady=5, fill=tk.X, ipady=2)
 
         # --- Option 4 (Insert CSV to DB) - Moved to Second ---
         self.option4_button = ttk.Button(
             main_frame,
-            text="☁️ Upload CSV to Azure SQL", # Simplified and emoji added
+            text="☁️ Upload CSV to Server", # Text updated, emoji kept
             command=self.start_db_insert_thread
         )
-        self.option4_button.pack(pady=5, fill=tk.X, ipady=2) # Added ipady
+        self.option4_button.pack(pady=5, fill=tk.X, ipady=2)
 
         # --- Separator ---
         separator = ttk.Separator(main_frame, orient='horizontal')
@@ -46,18 +46,18 @@ class AppGUI:
         # --- Option 1 (Get Steam Data for Listed Games) ---
         self.option1_button = ttk.Button(
             main_frame,
-            text="📄 Scrape Listed Games from CSV", # Simplified and emoji added
+            text="Scrape Listed Games from CSV", # Emoji removed
             command=self.start_listed_scrape_thread
         )
-        self.option1_button.pack(pady=5, fill=tk.X, ipady=2) # Added ipady
+        self.option1_button.pack(pady=5, fill=tk.X, ipady=2)
 
         # --- Option 3 (Fetch Titles from DB & Store) ---
         self.option3_button = ttk.Button(
             main_frame,
-            text="⚙️ Process DB Titles to MongoDB", # Simplified and emoji added
+            text="Process DB Titles to MongoDB", # Emoji removed
             command=self.start_db_process_thread
         )
-        self.option3_button.pack(pady=5, fill=tk.X, ipady=2) # Added ipady
+        self.option3_button.pack(pady=5, fill=tk.X, ipady=2)
 
         # --- Status Label ---
         self.status_label = ttk.Label(main_frame, text="Ready", wraplength=400)
