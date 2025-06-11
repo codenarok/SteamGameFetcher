@@ -96,9 +96,48 @@ def insert_csv_to_db(csv_path, status_callback, progress_callback):
              return False, f"Error: CSV is missing required date column '{date_column}'."
 
         if csv_columns_lower != db_columns_lower:
-            return False, "Error: CSV columns do not match target table columns (name or order)."
-        status_callback("Column validation successful.")
+            # The raw column lists are already sent to status_callback just before this check.
+            # So, the error message can focus on the discrepancies.
+            error_lines = ["Error: CSV columns do not match target table columns (name or order)."]
+            
+            # Analyze differences
+            set_db_lower = set(db_columns_lower)
+            set_csv_lower = set(csv_columns_lower)
 
+            # Columns in DB but not in CSV
+            missing_in_csv_lower = list(set_db_lower - set_csv_lower)
+            if missing_in_csv_lower:
+                missing_display = [db_col for db_col in db_columns_raw if db_col.lower() in missing_in_csv_lower]
+                error_lines.append(f"  Missing from CSV (required by DB): {', '.join(missing_display)}")
+
+            # Columns in CSV but not in DB
+            extra_in_csv_lower = list(set_csv_lower - set_db_lower)
+            if extra_in_csv_lower:
+                extra_display = [csv_col for csv_col in csv_columns_raw if csv_col.lower() in extra_in_csv_lower]
+                error_lines.append(f"  Extra in CSV (not in DB): {', '.join(extra_display)}")
+
+            # If column counts are different
+            if len(db_columns_lower) != len(csv_columns_lower):
+                error_lines.append(f"  Column count mismatch: DB expects {len(db_columns_lower)}, CSV has {len(csv_columns_lower)}.")
+            # If column counts are the same, and sets of names (case-insensitive) are the same, it must be an order issue.
+            elif set_db_lower == set_csv_lower: # This implies len is same and names (case-insensitive) are same
+                error_lines.append("  Column order mismatch (all expected column names are present, but in wrong order):")
+                for i in range(len(db_columns_lower)):
+                    if db_columns_lower[i] != csv_columns_lower[i]:
+                        # Show the first point of divergence with original casing for clarity
+                        error_lines.append(f"    At position {i+1}: DB expects '{db_columns_raw[i]}', CSV has '{csv_columns_raw[i]}'.")
+                        break 
+            
+            # Fallback: if only the generic error message is present, add more details.
+            if len(error_lines) == 1: # Only the initial "Error: CSV columns do not match..."
+                error_lines.append("  Please check column names, count, and order carefully.")
+                # Re-iterate the full lists if no specific discrepancy was detailed.
+                error_lines.append(f"  Expected DB Columns: {', '.join(db_columns_raw)}")
+                error_lines.append(f"  Actual CSV Columns: {', '.join(csv_columns_raw)}")
+
+            return False, "\n".join(error_lines)
+
+        status_callback("Column validation successful.")
         # --- Data Type Conversion and Cleaning ---
         status_callback("Cleaning and converting data types...")
         numeric_sql_types = ['int', 'bigint', 'smallint', 'tinyint', 'decimal', 'numeric', 'float', 'real', 'money', 'smallmoney', 'bit']
