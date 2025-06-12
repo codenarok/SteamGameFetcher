@@ -2,9 +2,32 @@ import pyodbc
 import pandas as pd
 import time
 import numpy as np
+import configparser # Added import
+import os # Added import
 
 # Define the default date
 DEFAULT_DATE = pd.Timestamp('1900-01-01')
+
+def get_db_config():
+    """Reads database configuration from config.ini"""
+    config = configparser.ConfigParser()
+    # Construct the path to config.ini relative to this script's directory
+    # Assumes config.ini is in the parent directory of the 'steam_fetcher' package
+    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config.ini')
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(f"Configuration file not found: {config_path}")
+    config.read(config_path)
+    
+    if 'SteamFetcherDatabase' not in config:
+        raise KeyError("Section [SteamFetcherDatabase] not found in config.ini")
+        
+    db_config = config['SteamFetcherDatabase']
+    required_keys = ['Server', 'Database', 'TargetTable', 'KeyColumn', 'DateColumn']
+    for key in required_keys:
+        if key not in db_config:
+            raise KeyError(f"Missing key '{key}' in [SteamFetcherDatabase] section of config.ini")
+            
+    return db_config
 
 def insert_csv_to_db(csv_path, status_callback, progress_callback):
     """
@@ -20,11 +43,15 @@ def insert_csv_to_db(csv_path, status_callback, progress_callback):
     Returns:
         tuple: (bool, str) indicating success/failure and a status message.
     """
-    server = 'certdatavalidation.database.windows.net'
-    database = 'DataValidation'
-    target_table_name = '[dbo].[SteamOSHandheldInfo]'
-    key_column = 'Title'
-    date_column = 'LastChange'
+    try:
+        db_conf = get_db_config()
+        server = db_conf['Server']
+        database = db_conf['Database']
+        target_table_name = db_conf['TargetTable']
+        key_column = db_conf['KeyColumn']
+        date_column = db_conf['DateColumn']
+    except (FileNotFoundError, KeyError) as e:
+        return False, str(e)
 
     rows_processed_total = 0
     rows_inserted = 0
